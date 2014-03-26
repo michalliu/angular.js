@@ -326,7 +326,7 @@ function qFactory(nextTick, exceptionHandler) {
         }
       }
     };
-
+    deferred.promise['always'] = deferred.promise['finally'];
     return deferred;
   };
 
