@@ -47,15 +47,16 @@ function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDoc
 
     if (lowercase(method) == 'jsonp') {
       var callbackId = '_' + (callbacks.counter++).toString(36);
-      callbacks[callbackId] = function(data) {
-        callbacks[callbackId].data = data;
-        callbacks[callbackId].called = true;
+	  var callbackfn = "angular_callbacks" + callbackId;
+      window[callbackfn] = function(data) {
+        window[callbackfn].data = data;
+        window[callbackfn].called = true;
       };
 
-      var jsonpDone = jsonpReq(url.replace('JSON_CALLBACK', 'angular.callbacks.' + callbackId),
+      var jsonpDone = jsonpReq(url.replace('JSON_CALLBACK', 'angular_callbacks' + callbackId),
           callbackId, function(status, text) {
-        completeRequest(callback, status, callbacks[callbackId].data, "", text);
-        callbacks[callbackId] = noop;
+        completeRequest(callback, status, window[callbackfn].data, "", text);
+        window[callbackfn] = noop;
       });
     } else {
 
