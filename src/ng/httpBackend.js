@@ -54,7 +54,7 @@ function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDoc
       };
 
       var jsonpDone = jsonpReq(url.replace('JSON_CALLBACK', 'angular_callbacks' + callbackId),
-          callbackId, function(status, text) {
+          callbackfn, function(status, text) {
         completeRequest(callback, status, window[callbackfn].data, "", text);
         window[callbackfn] = noop;
       });
@@ -174,7 +174,7 @@ function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDoc
       var text = "unknown";
 
       if (event) {
-        if (event.type === "load" && !callbacks[callbackId].called) {
+        if (event.type === "load" && !window[callbackId].called) {
           event = { type: "error" };
         }
         text = event.type;
