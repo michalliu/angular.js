@@ -32,11 +32,11 @@ function createXhr(method) {
  */
 function $HttpBackendProvider() {
   this.$get = ['$browser', '$window', '$document', function($browser, $window, $document) {
-    return createHttpBackend($browser, createXhr, $browser.defer, $window.angular.callbacks, $document[0]);
+    return createHttpBackend($browser, $window, createXhr, $browser.defer, $window.angular.callbacks, $document[0]);
   }];
 }
 
-function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDocument) {
+function createHttpBackend($browser, $window, createXhr, $browserDefer, callbacks, rawDocument) {
   var ABORTED = -1;
 
   // TODO(vojta): fix the signature
@@ -48,15 +48,15 @@ function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDoc
     if (lowercase(method) == 'jsonp') {
       var callbackId = '_' + (callbacks.counter++).toString(36);
 	  var callbackfn = "angular_callbacks" + callbackId;
-      window[callbackfn] = function(data) {
-        window[callbackfn].data = data;
-        window[callbackfn].called = true;
+      $window[callbackfn] = function(data) {
+        $window[callbackfn].data = data;
+        $window[callbackfn].called = true;
       };
 
       var jsonpDone = jsonpReq(url.replace('JSON_CALLBACK', 'angular_callbacks' + callbackId),
           callbackfn, function(status, text) {
-        completeRequest(callback, status, window[callbackfn].data, "", text);
-        window[callbackfn] = noop;
+        completeRequest(callback, status, $window[callbackfn].data, "", text);
+        $window[callbackfn] = noop;
       });
     } else {
 
@@ -174,7 +174,7 @@ function createHttpBackend($browser, createXhr, $browserDefer, callbacks, rawDoc
       var text = "unknown";
 
       if (event) {
-        if (event.type === "load" && !window[callbackId].called) {
+        if (event.type === "load" && !$window[callbackId].called) {
           event = { type: "error" };
         }
         text = event.type;
